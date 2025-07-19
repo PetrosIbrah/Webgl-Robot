@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        Γραφικά Υπολογιστών
+    </title>
+    <script src="Lib/gl-matrix-min.js"></script>
+    <script src="Lib/webgl-debug.js"></script>
+
+    <script id="vShader" type="x-shader/x-vertex">
+		attribute vec4 aVertexPosition;
+		attribute vec4 aVertexColor;
+		attribute vec2 aTextureCoordinates;
+
+		uniform mat4 uModelMatrix;
+		uniform mat4 uViewMatrix;
+		uniform mat4 uProjectionMatrix;
+
+		varying vec4 vColor;
+		varying vec2 vTextureCoord;
+
+		void main() {
+			gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aVertexPosition;
+			vColor = aVertexColor;
+			vTextureCoord = aTextureCoordinates;
+		}
+	</script>
+
+    <script id="fShader" type="x-shader/x-fragment">
+		precision mediump float;
+
+		varying vec4 vColor;
+		varying vec2 vTextureCoord;
+
+		uniform sampler2D uSampler;
+		uniform int uUseTexture;
+
+		void main() {
+			if (uUseTexture == 1) {
+				gl_FragColor = texture2D(uSampler, vTextureCoord);
+			} else {
+				gl_FragColor = vColor;
+			}
+		}
+	</script>
+
+    <script src="Script-4.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            background: #fff;
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        .controls label, .controls input {
+            display: block;
+            margin: 5px 0;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .radio-option input {
+            margin: 0 5px 0 0;
+            display: inline-block;
+        }
+        .radio-option label {
+            display: inline-block;
+            margin: 0;
+        }
+        #sceneCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body onload="main()">
+    <div class="controls">
+        <label for="viewAngle">View Angle (degrees):</label>
+        <input type="number" id="viewAngle" value="60" step="1" min="1" max="179">
+        <label for="camOrthoDistance">Camera Distance:</label>
+        <input type="number" id="camOrthoDistance" value="40" step="0.1" min="0.1">
+        <hr>
+        <label>Camera Position:</label>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="left-front-top" checked><label>Left-Front-Top</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="left-front-bottom"><label>Left-Front-Bottom</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="left-back-top"><label>Left-Back-Top</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="left-back-bottom"><label>Left-Back-Bottom</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="right-front-top"><label>Right-Front-Top</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="right-front-bottom"><label>Right-Front-Bottom</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="right-back-top"><label>Right-Back-Top</label></div>
+        <div class="radio-option"><input type="radio" name="cameraPosition" value="right-back-bottom"><label>Right-Back-Bottom</label></div>
+        <hr>
+        <button onclick="updateScene()">Apply</button>
+        <hr>
+        Γωνία περιστροφής:<input type="text" id="stepAngleTxt" value="1" autocomplete="off"> 
+        Υψος:<input type="text" id="stepZTxt" value="0.01" autocomplete="off">
+        <button onclick="StartAnimation()">Start</button>
+        <button onclick="StopAnimation()">Stop</button>
+        <hr>
+        Θέση ποντικιού x:<span id="mouseX">759</span>, y:<span id="mouseY">573</span>
+        <hr>
+        <label>Select Part to Rotate:</label>
+        <div class="radio-option"><input type="radio" name="LimbPart" value="rightArm" checked><label>Right Arm</label></div>
+        <div class="radio-option"><input type="radio" name="LimbPart" value="leftArm"><label>Left Arm</label></div>
+        <div class="radio-option"><input type="radio" name="LimbPart" value="head"><label>Head</label></div>
+        <div class="radio-option"><input type="radio" name="LimbPart" value="rightFoot"><label>Right Foot</label></div>
+        <div class="radio-option"><input type="radio" name="LimbPart" value="leftFoot"><label>Left Foot</label></div>
+        <hr>
+        <button onclick="StartParade()">Start Parade</button>
+        <button onclick="StopParade()">Stop Parade</button>
+        <button onclick="Reset()">Reset</button>
+    </div>
+    <canvas id="sceneCanvas"></canvas>
+</body>
+</html>
